@@ -6,26 +6,9 @@ SlackApp that makes team rotations easy
 
 [Install Go](https://go.dev/doc/install), you can do this with Brew or your favourite way of installing dependencies.
 
-```shell
-  brew install go
-```
-
-Run Tests:
-
-```shell
-  make test
-```
-
-Build and run:
-
-```shell
-  make clean build
-  make run
-```
-
-Check lint and dependencies:
-
-```shell
-  make check
-  make lint
-``` 
+* Install dependencies like this: `make install`
+* Run Tests: `make test`
+* Compile the app like this: `make build`
+* Run the app: `make dev`
+    * This would use something called reflex and reload the app continuously when you change a go file.
+* Check your linting by running `make lint`
