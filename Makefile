@@ -3,7 +3,7 @@ MODULE = github.com/kevinrobayna/rotabot
 GIT_SHA = $(shell git rev-parse --short HEAD)-dev
 DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_COMMAND = CGO_ENABLED=0 go build -ldflags "-X 'main.Version=$(GIT_SHA)' -X 'main.Date=$(DATE)'"
-LINT_COMMAND = golangci-lint run --fast
+LINT_COMMAND = golangci-lint run
 UNAME_S := $(shell uname -s)
 
 .PHONY: clean

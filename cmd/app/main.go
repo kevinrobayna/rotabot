@@ -9,5 +9,5 @@ var (
 )
 
 func main() {
-	fmt.Println(fmt.Sprintf("Hello world from %s running %s built on %s\n", AppName, Version, Date))
+	fmt.Printf("Hello world from %s running %s built on %s\n", AppName, Version, Date)
 }
