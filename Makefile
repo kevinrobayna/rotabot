@@ -4,14 +4,13 @@ GIT_SHA = $(shell git rev-parse --short HEAD)-dev
 DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_COMMAND = CGO_ENABLED=0 go build -ldflags "-X 'main.Version=$(GIT_SHA)' -X 'main.Date=$(DATE)'"
 LINT_COMMAND = golangci-lint run
-UNAME_S := $(shell uname -s)
 
 .PHONY: clean
 clean:
 	rm -rvf $(PROG) $(PROG:%=%.linux_amd64) $(PROG:%=%.darwin_amd64)
 
 .PHONY: build
-build: $(PROG)
+build: clean $(PROG)
 
 .PHONY: all darwin linux
 all: darwin linux
@@ -29,21 +28,15 @@ bin/%:
 
 .PHONY: test
 test:
-	go run gotest.tools/gotestsum \
-		--format short-verbose \
-		--packages="./..." \
-		--rerun-fails=3 \
-		-- -coverprofile=cover.out
+	gotestsum -- -coverprofile=cover.out
+
+.PHONY: dev
+dev: clean build
+	reflex --sequential --decoration=fancy --config=reflex.conf
 
 .PHONY: run
 run:
 	$(PROG)
-
-.PHONY: check
-check:
-	go mod verify
-	go mod tidy
-	go vet ./...
 
 .PHONY: lint
 lint:
@@ -52,3 +45,12 @@ lint:
 .PHONY: lint-fix
 lint-fix:
 	$(LINT_COMMAND) --fix
+
+.PHONY: install
+install: install-deps
+
+.PHONY: install-deps
+install-deps:
+	go mod download
+	go install github.com/cespare/reflex
+	go install gotest.tools/gotestsum
