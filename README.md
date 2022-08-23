@@ -16,18 +16,6 @@ Run Tests:
   make test
 ```
 
-Spin up database and other dependencies:
-
-```shell
-  docker-compose up -d
-```
-
-Once you don't need them anymore you can run the following command to stop the containers:
-
-```shell
-  docker-compose down -v
-```
-
 Build and run:
 
 ```shell
