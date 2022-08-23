@@ -10,6 +10,10 @@ var (
 	Date    = "unknown"
 )
 
+func hello() string {
+	return fmt.Sprintf("Hello world from %s running %s built on %s", AppName, Version, Date)
+}
+
 func main() {
-	fmt.Printf("Hello world from %s running %s built on %s\n", AppName, Version, Date)
+	fmt.Println(hello())
 }

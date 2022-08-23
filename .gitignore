@@ -3,6 +3,7 @@
 
 # This will ignore the output of the application
 bin/
+tools/
 
 ### DB Stuff
 *.sqlite

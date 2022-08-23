@@ -5,6 +5,16 @@ DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_COMMAND = CGO_ENABLED=0 go build -ldflags "-X 'main.Version=$(GIT_SHA)' -X 'main.Date=$(DATE)'"
 LINT_COMMAND = golangci-lint run
 
+LICENSED_VERSION = 3.7.2
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+		LICENSED_URL = https://github.com/github/licensed/releases/download/$(LICENSED_VERSION)/licensed-$(LICENSED_VERSION)-linux-x64.tar.gz
+endif
+ifeq ($(UNAME_S),Darwin)
+		LICENSED_URL = https://github.com/github/licensed/releases/download/$(LICENSED_VERSION)/licensed-$(LICENSED_VERSION)-darwin-x64.tar.gz
+endif
+
 .PHONY: clean
 clean:
 	rm -rvf $(PROG) $(PROG:%=%.linux_amd64) $(PROG:%=%.darwin_amd64)
@@ -28,7 +38,7 @@ bin/%:
 
 .PHONY: test
 test:
-	gotestsum -- -coverprofile=cover.out
+	gotestsum --packages="./..." -- -coverprofile=cover.out
 
 .PHONY: dev
 dev: build
@@ -46,11 +56,34 @@ lint:
 lint-fix:
 	$(LINT_COMMAND) --fix
 
+.PHONE: licenses
+licenses: cache-licenses check-licenses
+	./scripts/check-changes.sh
+
+.PHONE: check-licenses
+check-licenses: cache-licenses
+	./tools/licensed status
+
+.PHONE: cache-licenses
+cache-licenses:
+	./tools/licensed cache
+
 .PHONY: install
-install: install-deps
+install: install-deps install-licensed
 
 .PHONY: install-deps
 install-deps:
 	go mod download
 	go install github.com/cespare/reflex
 	go install gotest.tools/gotestsum
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint
+
+
+.PHONY: install-licensed
+install-licensed:
+ifndef LICENSED_URL
+	$(error Could not resolve LICENSED_URL for the current OS ($(UNAME_S)))
+endif
+	mkdir -p tools
+	curl -sSfL $(LICENSED_URL) > tools/licensed-$(LICENSED_VERSION).tar.gz
+	tar xzf tools/licensed-$(LICENSED_VERSION).tar.gz --directory tools
