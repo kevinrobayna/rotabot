@@ -31,7 +31,7 @@ test:
 	gotestsum -- -coverprofile=cover.out
 
 .PHONY: dev
-dev: clean build
+dev: build
 	reflex --sequential --decoration=fancy --config=reflex.conf
 
 .PHONY: run
