@@ -27,12 +27,8 @@ jobs:
       - run: go mod verify
       - run: go vet ./...
 
-      - uses: jonabc/setup-licensed@v1
-        with:
-          version: 3.x
-      - uses: jonabc/licensed-ci@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check licenses
+        run: make check-licenses
 
       - run: make build
       - run: make test

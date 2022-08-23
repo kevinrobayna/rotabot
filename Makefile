@@ -56,13 +56,10 @@ lint:
 lint-fix:
 	$(LINT_COMMAND) --fix
 
-.PHONE: licenses
-licenses: cache-licenses check-licenses
-	./scripts/check-changes.sh
-
 .PHONE: check-licenses
 check-licenses: cache-licenses
 	./tools/licensed status
+	./scripts/check-changes.sh
 
 .PHONE: cache-licenses
 cache-licenses:
