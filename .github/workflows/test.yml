@@ -23,14 +23,15 @@ jobs:
         id: go
       - uses: actions/checkout@v3
 
-      - name: Check
-        run: make check
+      - run: make install
+      - run: go mod verify
+      - run: go vet ./...
 
-      - name: build
-        run: make clean build
+      - name: Check licenses
+        run: make check-licenses
 
-      - name: test
-        run: make test
+      - run: make build
+      - run: make test
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v3
