@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    name: lint
+    steps:
+      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v3
+      - uses: golangci/golangci-lint-action@v3
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+        id: go
+      - uses: actions/checkout@v3
+
+      - name: Check
+        run: make check
+
+      - name: build
+        run: make clean build
+
+      - name: test
+        run: make test
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./cover.out
+          name: rotabot
