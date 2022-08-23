@@ -1,0 +1,23 @@
+name: Auto Update PRs
+on:
+  push:
+    branches:
+      - main
+jobs:
+  shipit:
+    name: Run Shipit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ship It
+        uses: kevinrobayna/shipit@v2.0.0
+        id: shipit
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          PR_FILTER: 'auto_merge' # Only monitor PRs that have 'auto merge' enabled
+          PR_READY_STATE: 'ready_for_review' # Only monitor PRs that are not currently in the draft state.
+          EXCLUDED_LABELS: "dependencies" # Ignore PRs raised by dependabot as it should update itself
+      - run: echo 'Merge conflicts found!'
+        if: ${{ steps.shipit.outputs.conflicted }}
+
+      - run: echo 'No merge conflicts'
+        if: ${{ !steps.shipit.outputs.conflicted }}
