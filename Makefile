@@ -1,8 +1,8 @@
 PROG = bin/app
 MODULE = github.com/kevinrobayna/rotabot
-GIT_SHA = $(shell git rev-parse --short HEAD)-dev
+GIT_SHA = $(shell git rev-parse --short HEAD)
 DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-BUILD_COMMAND = CGO_ENABLED=0 go build -ldflags "-X 'main.Version=$(GIT_SHA)' -X 'main.Date=$(DATE)'"
+BUILD_COMMAND = CGO_ENABLED=0 go build -ldflags "-X 'main.Sha=$(GIT_SHA)' -X 'main.Date=$(DATE)'"
 LINT_COMMAND = golangci-lint run
 
 LICENSED_VERSION = 3.7.2
@@ -14,6 +14,11 @@ endif
 ifeq ($(UNAME_S),Darwin)
 		LICENSED_URL = https://github.com/github/licensed/releases/download/$(LICENSED_VERSION)/licensed-$(LICENSED_VERSION)-darwin-x64.tar.gz
 endif
+
+.PHONY: generate
+generate:
+	go generate ./...
+	goa gen $(MODULE)/design
 
 .PHONY: clean
 clean:
@@ -46,7 +51,7 @@ dev: build
 
 .PHONY: run
 run:
-	$(PROG)
+	$(PROG) web
 
 .PHONY: lint
 lint:
@@ -74,6 +79,8 @@ install-deps:
 	go install github.com/cespare/reflex
 	go install gotest.tools/gotestsum
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint
+	go install goa.design/goa/v3/cmd/goa@v3
+
 
 
 .PHONY: install-licensed
