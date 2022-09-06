@@ -27,10 +27,13 @@ jobs:
       - run: go mod verify
       - run: go vet ./...
 
-      - name: Check licenses
-        run: make check-licenses
-
       - run: make build
+
+      - name: Check generated files
+        run: |
+          make generate
+          ./scripts/check-changes.sh
+
       - run: make test
 
       - name: Upload coverage report
