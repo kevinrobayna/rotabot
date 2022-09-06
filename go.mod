@@ -1,6 +1,6 @@
 module github.com/kevinrobayna/rotabot
 
-go 1.18
+go 1.19
 
 require (
 	github.com/cespare/reflex v0.3.1
