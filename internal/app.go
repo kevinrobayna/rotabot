@@ -11,7 +11,28 @@ import (
 	goahttp "goa.design/goa/v3/http"
 	"net"
 	"net/http"
+	"strings"
 )
+
+func Module(ctx context.Context) fx.Option {
+	return fx.Module("rotabot",
+		fx.Provide(providePort),
+		fx.Provide(provideListener),
+		fx.Provide(provideServerMux),
+		fx.Provide(provideHttpServer),
+		fx.Provide(NewRotabotService),
+		fx.Provide(func() context.Context { return ctx }),
+
+		fx.Invoke(invokeHttpServer),
+	)
+}
+
+type Port string
+
+func providePort(listener net.Listener) Port {
+	addr := strings.TrimPrefix(listener.Addr().String(), "[::]:")
+	return Port(addr)
+}
 
 func provideListener(ctx context.Context) net.Listener {
 	addr := ":8080"
