@@ -37,7 +37,7 @@ jobs:
       - run: make test
 
       - name: Upload coverage report
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v2
         with:
           files: ./cover.out
           name: rotabot
