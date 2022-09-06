@@ -40,4 +40,5 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           files: ./cover.out
-          name: rotabot
+          verbose: true
+          gcov_ignore: "design/,gen/"
