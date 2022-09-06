@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kevinrobayna/rotabot/internal/service"
-	"github.com/kevinrobayna/rotabot/internal/zapctx"
+	"github.com/kevinrobayna/rotabot/internal"
+	"github.com/kevinrobayna/rotabot/internal/shell"
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
@@ -44,10 +44,10 @@ func main() {
 		Usage:                "SlackApp that makes team rotations easy",
 		Version:              Version,
 		Commands: []*cli.Command{
-			service.NewCommand(),
+			internal.NewCommand(),
 		},
 		Before: func(ctx *cli.Context) error {
-			zl, err := zapctx.NewLoggerConfig().Build(zap.AddCaller())
+			zl, err := shell.DefaultLoggerConfig().Build(zap.AddCaller())
 			if err != nil {
 				return err
 			}
@@ -61,7 +61,7 @@ func main() {
 			zap.ReplaceGlobals(zl)
 
 			logger = zl
-			ctx.Context = zapctx.WithLogger(ctx.Context, logger)
+			ctx.Context = shell.WithLogger(ctx.Context, logger)
 			return nil
 		},
 	}

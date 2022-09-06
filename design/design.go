@@ -9,7 +9,7 @@ var _ = API("Rotabot", func() {
 	Description("SlackApp that makes team rotations easy")
 	Server("web", func() {
 		Host("localhost", func() {
-			URI("http://localhost:8000")
+			URI("http://localhost:8080")
 		})
 	})
 })
@@ -20,20 +20,13 @@ var _ = Service("Rotabot", func() {
 	Method("Healthcheck", func() {
 
 		HTTP(func() {
+			Response(StatusOK, func() {
+				ContentType("application/json")
+			})
 			GET("/healthcheck")
 		})
 
-		Result(String)
-
-	})
-
-	Method("Home", func() {
-
-		HTTP(func() {
-			GET("/")
-		})
-
-		Result(String)
+		Result(Empty)
 
 	})
 

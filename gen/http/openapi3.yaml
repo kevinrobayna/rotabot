@@ -4,23 +4,8 @@ info:
     description: SlackApp that makes team rotations easy
     version: "1.0"
 servers:
-    - url: http://localhost:8000
+    - url: http://localhost:8080
 paths:
-    /:
-        get:
-            tags:
-                - Rotabot
-            summary: Home Rotabot
-            operationId: Rotabot#Home
-            responses:
-                "200":
-                    description: OK response.
-                    content:
-                        application/json:
-                            schema:
-                                type: string
-                                example: Quisquam nam consequatur et pariatur.
-                            example: Cum maiores ut omnis qui voluptatem.
     /healthcheck:
         get:
             tags:
@@ -30,12 +15,6 @@ paths:
             responses:
                 "200":
                     description: OK response.
-                    content:
-                        application/json:
-                            schema:
-                                type: string
-                                example: Ipsa et.
-                            example: Magni aut sed.
 components: {}
 tags:
     - name: Rotabot

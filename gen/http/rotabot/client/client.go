@@ -21,9 +21,6 @@ type Client struct {
 	// endpoint.
 	HealthcheckDoer goahttp.Doer
 
-	// Home Doer is the HTTP client used to make requests to the Home endpoint.
-	HomeDoer goahttp.Doer
-
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
 	RestoreResponseBody bool
@@ -45,7 +42,6 @@ func NewClient(
 ) *Client {
 	return &Client{
 		HealthcheckDoer:     doer,
-		HomeDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -68,25 +64,6 @@ func (c *Client) Healthcheck() goa.Endpoint {
 		resp, err := c.HealthcheckDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("Rotabot", "Healthcheck", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// Home returns an endpoint that makes HTTP requests to the Rotabot service
-// Home server.
-func (c *Client) Home() goa.Endpoint {
-	var (
-		decodeResponse = DecodeHomeResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildHomeRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.HomeDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("Rotabot", "Home", err)
 		}
 		return decodeResponse(resp)
 	}

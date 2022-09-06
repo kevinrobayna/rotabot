@@ -20,7 +20,6 @@ import (
 type Server struct {
 	Mounts      []*MountPoint
 	Healthcheck http.Handler
-	Home        http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -57,10 +56,8 @@ func New(
 	return &Server{
 		Mounts: []*MountPoint{
 			{"Healthcheck", "GET", "/healthcheck"},
-			{"Home", "GET", "/"},
 		},
 		Healthcheck: NewHealthcheckHandler(e.Healthcheck, mux, decoder, encoder, errhandler, formatter),
-		Home:        NewHomeHandler(e.Home, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -70,13 +67,11 @@ func (s *Server) Service() string { return "Rotabot" }
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Healthcheck = m(s.Healthcheck)
-	s.Home = m(s.Home)
 }
 
 // Mount configures the mux to serve the Rotabot endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountHealthcheckHandler(mux, h.Healthcheck)
-	MountHomeHandler(mux, h.Home)
 }
 
 // Mount configures the mux to serve the Rotabot endpoints.
@@ -113,50 +108,6 @@ func NewHealthcheckHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "Healthcheck")
-		ctx = context.WithValue(ctx, goa.ServiceKey, "Rotabot")
-		var err error
-		res, err := endpoint(ctx, nil)
-		if err != nil {
-			if err := encodeError(ctx, w, err); err != nil {
-				errhandler(ctx, w, err)
-			}
-			return
-		}
-		if err := encodeResponse(ctx, w, res); err != nil {
-			errhandler(ctx, w, err)
-		}
-	})
-}
-
-// MountHomeHandler configures the mux to serve the "Rotabot" service "Home"
-// endpoint.
-func MountHomeHandler(mux goahttp.Muxer, h http.Handler) {
-	f, ok := h.(http.HandlerFunc)
-	if !ok {
-		f = func(w http.ResponseWriter, r *http.Request) {
-			h.ServeHTTP(w, r)
-		}
-	}
-	mux.Handle("GET", "/", f)
-}
-
-// NewHomeHandler creates a HTTP handler which loads the HTTP request and calls
-// the "Rotabot" service "Home" endpoint.
-func NewHomeHandler(
-	endpoint goa.Endpoint,
-	mux goahttp.Muxer,
-	decoder func(*http.Request) goahttp.Decoder,
-	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
-	errhandler func(context.Context, http.ResponseWriter, error),
-	formatter func(err error) goahttp.Statuser,
-) http.Handler {
-	var (
-		encodeResponse = EncodeHomeResponse(encoder)
-		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
-	)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "Home")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "Rotabot")
 		var err error
 		res, err := endpoint(ctx, nil)

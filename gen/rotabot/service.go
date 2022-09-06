@@ -14,9 +14,7 @@ import (
 // Service responsible for handling commands to create, update, and manage rotas
 type Service interface {
 	// Healthcheck implements Healthcheck.
-	Healthcheck(context.Context) (res string, err error)
-	// Home implements Home.
-	Home(context.Context) (res string, err error)
+	Healthcheck(context.Context) (err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -27,4 +25,4 @@ const ServiceName = "Rotabot"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"Healthcheck", "Home"}
+var MethodNames = [1]string{"Healthcheck"}

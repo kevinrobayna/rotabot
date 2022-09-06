@@ -11,8 +11,3 @@ package server
 func HealthcheckRotabotPath() string {
 	return "/healthcheck"
 }
-
-// HomeRotabotPath returns the URL path to the Rotabot service Home HTTP endpoint.
-func HomeRotabotPath() string {
-	return "/"
-}

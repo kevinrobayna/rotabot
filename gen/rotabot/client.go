@@ -16,33 +16,17 @@ import (
 // Client is the "Rotabot" service client.
 type Client struct {
 	HealthcheckEndpoint goa.Endpoint
-	HomeEndpoint        goa.Endpoint
 }
 
 // NewClient initializes a "Rotabot" service client given the endpoints.
-func NewClient(healthcheck, home goa.Endpoint) *Client {
+func NewClient(healthcheck goa.Endpoint) *Client {
 	return &Client{
 		HealthcheckEndpoint: healthcheck,
-		HomeEndpoint:        home,
 	}
 }
 
 // Healthcheck calls the "Healthcheck" endpoint of the "Rotabot" service.
-func (c *Client) Healthcheck(ctx context.Context) (res string, err error) {
-	var ires interface{}
-	ires, err = c.HealthcheckEndpoint(ctx, nil)
-	if err != nil {
-		return
-	}
-	return ires.(string), nil
-}
-
-// Home calls the "Home" endpoint of the "Rotabot" service.
-func (c *Client) Home(ctx context.Context) (res string, err error) {
-	var ires interface{}
-	ires, err = c.HomeEndpoint(ctx, nil)
-	if err != nil {
-		return
-	}
-	return ires.(string), nil
+func (c *Client) Healthcheck(ctx context.Context) (err error) {
+	_, err = c.HealthcheckEndpoint(ctx, nil)
+	return
 }

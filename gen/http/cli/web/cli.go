@@ -20,10 +20,9 @@ import (
 
 // UsageCommands returns the set of commands and sub-commands using the format
 //
-//    command (subcommand1|subcommand2|...)
-//
+//	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
-	return `rotabot (healthcheck|home)
+	return `rotabot healthcheck
 `
 }
 
@@ -46,12 +45,9 @@ func ParseEndpoint(
 		rotabotFlags = flag.NewFlagSet("rotabot", flag.ContinueOnError)
 
 		rotabotHealthcheckFlags = flag.NewFlagSet("healthcheck", flag.ExitOnError)
-
-		rotabotHomeFlags = flag.NewFlagSet("home", flag.ExitOnError)
 	)
 	rotabotFlags.Usage = rotabotUsage
 	rotabotHealthcheckFlags.Usage = rotabotHealthcheckUsage
-	rotabotHomeFlags.Usage = rotabotHomeUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -90,9 +86,6 @@ func ParseEndpoint(
 			case "healthcheck":
 				epf = rotabotHealthcheckFlags
 
-			case "home":
-				epf = rotabotHomeFlags
-
 			}
 
 		}
@@ -121,9 +114,6 @@ func ParseEndpoint(
 			case "healthcheck":
 				endpoint = c.Healthcheck()
 				data = nil
-			case "home":
-				endpoint = c.Home()
-				data = nil
 			}
 		}
 	}
@@ -142,7 +132,6 @@ Usage:
 
 COMMAND:
     healthcheck: Healthcheck implements Healthcheck.
-    home: Home implements Home.
 
 Additional help:
     %[1]s rotabot COMMAND --help
@@ -155,15 +144,5 @@ Healthcheck implements Healthcheck.
 
 Example:
     %[1]s rotabot healthcheck
-`, os.Args[0])
-}
-
-func rotabotHomeUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] rotabot home
-
-Home implements Home.
-
-Example:
-    %[1]s rotabot home
 `, os.Args[0])
 }

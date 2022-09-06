@@ -16,35 +16,24 @@ import (
 // Endpoints wraps the "Rotabot" service endpoints.
 type Endpoints struct {
 	Healthcheck goa.Endpoint
-	Home        goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "Rotabot" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		Healthcheck: NewHealthcheckEndpoint(s),
-		Home:        NewHomeEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "Rotabot" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Healthcheck = m(e.Healthcheck)
-	e.Home = m(e.Home)
 }
 
 // NewHealthcheckEndpoint returns an endpoint function that calls the method
 // "Healthcheck" of service "Rotabot".
 func NewHealthcheckEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		return s.Healthcheck(ctx)
-	}
-}
-
-// NewHomeEndpoint returns an endpoint function that calls the method "Home" of
-// service "Rotabot".
-func NewHomeEndpoint(s Service) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		return s.Home(ctx)
+		return nil, s.Healthcheck(ctx)
 	}
 }
