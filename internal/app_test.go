@@ -31,5 +31,4 @@ func TestSvc_Healthcheck(t *testing.T) {
 
 	_, err = io.ReadAll(resp.Body)
 	assert.NoError(t, err)
-
 }

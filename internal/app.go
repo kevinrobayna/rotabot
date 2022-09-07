@@ -44,7 +44,7 @@ func provideListener(ctx context.Context) net.Listener {
 	return l
 }
 
-func provideServerRouter(ctx context.Context) *httprouter.Router {
+func provideServerRouter(_ context.Context) *httprouter.Router {
 	r := httprouter.New()
 
 	//TODO this needs to be moved out of here
