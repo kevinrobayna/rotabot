@@ -74,7 +74,7 @@ func LoggerInjectionHandler(next http.Handler) http.Handler {
 		ctx := r.Context()
 		l := Logger(ctx).With(
 			zap.String("method", r.Method),
-			zap.String("path", r.URL.String()),
+			zap.String("path", r.URL.EscapedPath()),
 			zap.String("request_id", fmt.Sprintf("%s", ctx.Value(RequestIdKey))),
 		)
 		next.ServeHTTP(w, r.WithContext(WithLogger(ctx, l)))
