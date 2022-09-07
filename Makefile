@@ -5,11 +5,6 @@ DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_COMMAND = CGO_ENABLED=0 go build -ldflags "-X 'main.Sha=$(GIT_SHA)' -X 'main.Date=$(DATE)'"
 LINT_COMMAND = golangci-lint run
 
-.PHONY: generate
-generate:
-	go generate ./...
-	goa gen $(MODULE)/design
-
 .PHONY: clean
 clean:
 	rm -rvf $(PROG) $(PROG:%=%.linux_amd64) $(PROG:%=%.darwin_amd64)
@@ -57,4 +52,3 @@ install:
 	go install github.com/cespare/reflex
 	go install gotest.tools/gotestsum
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint
-	go install goa.design/goa/v3/cmd/goa@v3
