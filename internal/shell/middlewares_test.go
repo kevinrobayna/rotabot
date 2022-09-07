@@ -104,3 +104,58 @@ func TestPanicRecoveryMiddlewareWithError(t *testing.T) {
 	assert.Equal(t, 2, len(loggedEntry.Context))
 	assert.Equal(t, "stacktrace", loggedEntry.Context[0].Key)
 }
+
+func TestRequestLogHandler(t *testing.T) {
+	ctx := context.Background()
+
+	observedZapCore, observedLogs := observer.New(zap.InfoLevel)
+	observedLogger := zap.New(observedZapCore)
+	ctx = WithLogger(ctx, observedLogger)
+
+	req := httptest.NewRequest("GET", "http://testing/foo", nil)
+
+	handlerToTest := RequestLogHandler(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}),
+	)
+
+	handlerToTest.ServeHTTP(httptest.NewRecorder(), req.WithContext(ctx))
+
+	assert.Equal(t, 2, observedLogs.Len())
+
+	assert.Equal(t, "endpoint.start", observedLogs.AllUntimed()[0].Message)
+	assert.Equal(t, "endpoint.finish", observedLogs.AllUntimed()[1].Message)
+
+	loggedEntry := observedLogs.AllUntimed()[1]
+	assert.Equal(t, 1, len(loggedEntry.Context))
+	assert.Equal(t, "duration", loggedEntry.Context[0].Key)
+}
+
+func TestLoggerInjectionHandler(t *testing.T) {
+	ctx := context.Background()
+
+	observedZapCore, observedLogs := observer.New(zap.InfoLevel)
+	observedLogger := zap.New(observedZapCore)
+	ctx = WithLogger(ctx, observedLogger)
+
+	req := httptest.NewRequest("GET", "http://testing/foo", nil)
+
+	handlerToTest := LoggerInjectionHandler(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			Logger(r.Context()).Info("hello")
+		}),
+	)
+
+	handlerToTest.ServeHTTP(httptest.NewRecorder(), req.WithContext(ctx))
+
+	assert.Equal(t, 1, observedLogs.Len())
+
+	loggedEntry := observedLogs.AllUntimed()[0]
+	assert.Equal(t, "hello", loggedEntry.Message)
+
+	assert.Equal(t, 3, len(loggedEntry.Context))
+	assert.Equal(t, "method", loggedEntry.Context[0].Key)
+	assert.Equal(t, "path", loggedEntry.Context[1].Key)
+	assert.Equal(t, "request_id", loggedEntry.Context[2].Key)
+}
