@@ -3,12 +3,14 @@ package internal
 import (
 	"context"
 	"errors"
-	"github.com/kevinrobayna/rotabot/gen/http/rotabot/server"
-	"github.com/kevinrobayna/rotabot/gen/rotabot"
+	"fmt"
+	"github.com/julienschmidt/httprouter"
 	"github.com/kevinrobayna/rotabot/internal/shell"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	goahttp "goa.design/goa/v3/http"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zapio"
+	stdlog "log"
 	"net"
 	"net/http"
 	"strings"
@@ -18,9 +20,8 @@ func Module(ctx context.Context) fx.Option {
 	return fx.Module("rotabot",
 		fx.Provide(providePort),
 		fx.Provide(provideListener),
-		fx.Provide(provideServerMux),
+		fx.Provide(provideServerRouter),
 		fx.Provide(provideHttpServer),
-		fx.Provide(NewRotabotService),
 		fx.Provide(func() context.Context { return ctx }),
 
 		fx.Invoke(invokeHttpServer),
@@ -43,33 +44,36 @@ func provideListener(ctx context.Context) net.Listener {
 	return l
 }
 
-func provideServerMux(ctx context.Context, service rotabot.Service) goahttp.Muxer {
-	mux := goahttp.NewMuxer()
+func provideServerRouter(_ context.Context) *httprouter.Router {
+	r := httprouter.New()
 
-	endpoints := rotabot.NewEndpoints(service)
-	endpoints.Use(shell.EndpointRecoverMiddleware())
-	endpoints.Use(shell.EndpointRequestLogMiddleware())
-	endpoints.Use(shell.EndpointLoggerInjectionMiddleware())
+	//TODO this needs to be moved out of here
+	r.GET("/healthcheck", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		shell.Logger(r.Context()).Info("Healthcheck")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "OK")
+	})
 
-	encoder := shell.ResponseEncoderWithLogs
-	decoder := shell.RequestDecoderWithLogs
-	rotabotServer := server.New(endpoints, mux, decoder, encoder, shell.ErrorHandler(), nil)
-	server.Mount(mux, rotabotServer)
-
-	l := shell.Logger(ctx)
-	for _, m := range rotabotServer.Mounts {
-		l.Info("mounts",
-			zap.String("verb", m.Verb),
-			zap.String("path", m.Pattern),
-			zap.String("method", m.Method),
-		)
-	}
-
-	return mux
+	return r
 }
 
-func provideHttpServer(ctx context.Context, mux goahttp.Muxer) *http.Server {
-	return shell.NewHttpServer(ctx, mux)
+func provideHttpServer(ctx context.Context, r *httprouter.Router) *http.Server {
+	//TODO: add requests time-outs since we don't want to keep connections open forever
+	return &http.Server{
+		Handler: wireUpMiddlewares(http.Handler(r)),
+		BaseContext: func(listener net.Listener) context.Context {
+			return ctx
+		},
+		ErrorLog: stdlog.New(&zapio.Writer{Log: shell.Logger(ctx), Level: zapcore.ErrorLevel}, "", 0),
+	}
+}
+
+func wireUpMiddlewares(h http.Handler) http.Handler {
+	h = shell.RecoveryHandler(h)
+	h = shell.RequestAccessLogHandler(h)
+	h = shell.LoggerInjectionHandler(h)
+	h = shell.RequestIdHandler(h)
+	return h
 }
 
 func invokeHttpServer(lc fx.Lifecycle, server *http.Server, listener net.Listener) {

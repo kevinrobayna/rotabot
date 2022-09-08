@@ -29,11 +29,6 @@ jobs:
 
       - run: make build
 
-      - name: Check generated files
-        run: |
-          make generate
-          ./scripts/check-changes.sh
-
       - run: make test
 
       - name: Upload coverage report
@@ -41,4 +36,3 @@ jobs:
         with:
           files: ./cover.out
           verbose: true
-          gcov_ignore: "design/,gen/"
