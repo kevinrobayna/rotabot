@@ -114,7 +114,7 @@ func TestRequestLogHandler(t *testing.T) {
 
 	req := httptest.NewRequest("GET", "http://testing/foo", nil)
 
-	handlerToTest := RequestLogHandler(
+	handlerToTest := RequestAccessLogHandler(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 		}),
@@ -124,8 +124,8 @@ func TestRequestLogHandler(t *testing.T) {
 
 	assert.Equal(t, 2, observedLogs.Len())
 
-	assert.Equal(t, "endpoint.start", observedLogs.AllUntimed()[0].Message)
-	assert.Equal(t, "endpoint.finish", observedLogs.AllUntimed()[1].Message)
+	assert.Equal(t, "request.start", observedLogs.AllUntimed()[0].Message)
+	assert.Equal(t, "request.finish", observedLogs.AllUntimed()[1].Message)
 
 	loggedEntry := observedLogs.AllUntimed()[1]
 	assert.Equal(t, 2, len(loggedEntry.Context))

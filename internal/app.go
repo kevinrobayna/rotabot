@@ -58,20 +58,22 @@ func provideServerRouter(_ context.Context) *httprouter.Router {
 }
 
 func provideHttpServer(ctx context.Context, r *httprouter.Router) *http.Server {
-	handler := http.Handler(r)
-	handler = shell.RecoveryHandler(handler)
-	handler = shell.RequestLogHandler(handler)
-	handler = shell.LoggerInjectionHandler(handler)
-	handler = shell.RequestIdHandler(handler)
-
-	//TODO: add requests time outs since we don't want to keep connections open forever
+	//TODO: add requests time-outs since we don't want to keep connections open forever
 	return &http.Server{
-		Handler: handler,
+		Handler: wireUpMiddlewares(http.Handler(r)),
 		BaseContext: func(listener net.Listener) context.Context {
 			return ctx
 		},
 		ErrorLog: stdlog.New(&zapio.Writer{Log: shell.Logger(ctx), Level: zapcore.ErrorLevel}, "", 0),
 	}
+}
+
+func wireUpMiddlewares(h http.Handler) http.Handler {
+	h = shell.RecoveryHandler(h)
+	h = shell.RequestAccessLogHandler(h)
+	h = shell.LoggerInjectionHandler(h)
+	h = shell.RequestIdHandler(h)
+	return h
 }
 
 func invokeHttpServer(lc fx.Lifecycle, server *http.Server, listener net.Listener) {

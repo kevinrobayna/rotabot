@@ -62,21 +62,22 @@ func (rc *responseCapture) WriteHeader(statusCode int) {
 	rc.ResponseWriter.WriteHeader(statusCode)
 }
 
-// RequestLogHandler waits for the request to complete logging the outcome of it.
-func RequestLogHandler(next http.Handler) http.Handler {
+// RequestAccessLogHandler waits for the request to complete logging the outcome of it.
+func RequestAccessLogHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		ctx := r.Context()
-		l := Logger(ctx)
-
-		// Run the next handler
-		l.Info("endpoint.start")
+		l := Logger(r.Context())
+		l.Info("request.start")
 		capture := &responseCapture{ResponseWriter: w}
+
+		defer func() {
+			l.Info("request.finish",
+				zap.Float64("duration", time.Since(start).Seconds()),
+				zap.Int("status", capture.statusCode),
+			)
+		}()
+
 		next.ServeHTTP(capture, r)
-		l.Info("endpoint.finish",
-			zap.Float64("duration", time.Since(start).Seconds()),
-			zap.Int("status", capture.statusCode),
-		)
 	})
 }
 
