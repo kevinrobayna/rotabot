@@ -116,7 +116,7 @@ func TestRequestLogHandler(t *testing.T) {
 
 	handlerToTest := RequestLogHandler(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 		}),
 	)
 
@@ -128,8 +128,10 @@ func TestRequestLogHandler(t *testing.T) {
 	assert.Equal(t, "endpoint.finish", observedLogs.AllUntimed()[1].Message)
 
 	loggedEntry := observedLogs.AllUntimed()[1]
-	assert.Equal(t, 1, len(loggedEntry.Context))
+	assert.Equal(t, 2, len(loggedEntry.Context))
 	assert.Equal(t, "duration", loggedEntry.Context[0].Key)
+	assert.Equal(t, "status", loggedEntry.Context[1].Key)
+	assert.Equal(t, int64(http.StatusBadRequest), loggedEntry.Context[1].Integer)
 }
 
 func TestLoggerInjectionHandler(t *testing.T) {

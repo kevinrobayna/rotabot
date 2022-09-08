@@ -52,6 +52,16 @@ func uuid() string {
 	return uuidGen.New().String()
 }
 
+type responseCapture struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rc *responseCapture) WriteHeader(statusCode int) {
+	rc.statusCode = statusCode
+	rc.ResponseWriter.WriteHeader(statusCode)
+}
+
 // RequestLogHandler waits for the request to complete logging the outcome of it.
 func RequestLogHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -61,9 +71,11 @@ func RequestLogHandler(next http.Handler) http.Handler {
 
 		// Run the next handler
 		l.Info("endpoint.start")
-		next.ServeHTTP(w, r)
+		capture := &responseCapture{ResponseWriter: w}
+		next.ServeHTTP(capture, r)
 		l.Info("endpoint.finish",
 			zap.Float64("duration", time.Since(start).Seconds()),
+			zap.Int("status", capture.statusCode),
 		)
 	})
 }
