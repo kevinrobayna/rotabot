@@ -3,8 +3,8 @@ package internal
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"github.com/kevinrobayna/rotabot/internal/rotabot"
 	"github.com/kevinrobayna/rotabot/internal/shell"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -23,6 +23,9 @@ func Module(ctx context.Context) fx.Option {
 		fx.Provide(provideServerRouter),
 		fx.Provide(provideHttpServer),
 		fx.Provide(func() context.Context { return ctx }),
+
+		fx.Provide(provideSlackConfig),
+		fx.Provide(provideService),
 
 		fx.Invoke(invokeHttpServer),
 	)
@@ -44,15 +47,25 @@ func provideListener(ctx context.Context) net.Listener {
 	return l
 }
 
-func provideServerRouter(_ context.Context) *httprouter.Router {
+func provideSlackConfig() slackConfig {
+	return slackConfig{
+		signingSecret: "", // Basic Information > App Credentials > Signing Secret
+		clientSecret:  "", // OAuth & Permissions > OAuth Tokens for Your Workspace > Bot User OAuth Access Token
+	}
+}
+
+func provideService(cfg slackConfig) Resource {
+	return &resource{
+		slackConfig: cfg,
+		handler:     rotabot.Handler{},
+	}
+}
+
+func provideServerRouter(svc Resource) *httprouter.Router {
 	r := httprouter.New()
 
-	//TODO this needs to be moved out of here
-	r.GET("/healthcheck", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		shell.Logger(r.Context()).Info("Healthcheck")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "OK")
-	})
+	r.HandlerFunc(http.MethodGet, "/healthcheck", svc.HealthCheck())
+	r.HandlerFunc(http.MethodPost, "/slack/events", svc.SlackEvents())
 
 	return r
 }
