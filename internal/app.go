@@ -23,7 +23,6 @@ func Module(ctx context.Context) fx.Option {
 		fx.Provide(provideServerRouter),
 		fx.Provide(provideHttpServer),
 		fx.Provide(func() context.Context { return ctx }),
-		fx.Provide(provideService),
 
 		fx.Invoke(invokeHttpServer),
 	)
@@ -45,14 +44,12 @@ func provideListener(ctx context.Context) net.Listener {
 	return l
 }
 
-func provideService(cfg config.AppConfig) Resource {
-	return Resource{
-		Config: cfg,
-	}
-}
-
-func provideServerRouter(resource Resource) *httprouter.Router {
+func provideServerRouter(cfg *config.AppConfig) *httprouter.Router {
 	r := httprouter.New()
+
+	resource := &resource{
+		cfg: cfg,
+	}
 
 	r.HandlerFunc(http.MethodGet, "/healthcheck", resource.HealthCheck())
 	r.HandlerFunc(http.MethodPost, "/slack/commands", resource.HandleSlashCommand())

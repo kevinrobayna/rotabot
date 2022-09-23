@@ -37,23 +37,13 @@ func NewCommand() *cli.Command {
 
 			app := fx.New(
 				Module(ctx),
-				fx.Provide(func() config.AppConfig { return buildConfigFromFlags(c) }),
+				fx.Provide(func() *config.AppConfig { return config.NewAppConfig(c) }),
 				shell.FxEvent(),
 			)
 
 			app.Run()
 
 			return nil
-		},
-	}
-}
-
-func buildConfigFromFlags(c *cli.Context) config.AppConfig {
-	return config.AppConfig{
-		Debug: c.Bool("verbose"),
-		Slack: config.SlackConfig{
-			SigningSecret: c.String("slack.signing_secret"),
-			ClientSecret:  c.String("slack.client_secret"),
 		},
 	}
 }

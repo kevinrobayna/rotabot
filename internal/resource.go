@@ -10,8 +10,8 @@ import (
 	"net/http"
 )
 
-type Resource struct {
-	Config config.AppConfig
+type resource struct {
+	cfg *config.AppConfig
 	endpoints
 }
 
@@ -20,7 +20,7 @@ type endpoints interface {
 	HandleSlashCommand() http.HandlerFunc
 }
 
-func (resource *Resource) HealthCheck() http.HandlerFunc {
+func (resource *resource) HealthCheck() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
@@ -28,11 +28,11 @@ func (resource *Resource) HealthCheck() http.HandlerFunc {
 	}
 }
 
-func (resource *Resource) HandleSlashCommand() http.HandlerFunc {
+func (resource *resource) HandleSlashCommand() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		l := shell.Logger(r.Context())
 
-		verifier, err := slack.NewSecretsVerifier(r.Header, resource.Config.Slack.SigningSecret)
+		verifier, err := slack.NewSecretsVerifier(r.Header, resource.cfg.Slack.SigningSecret)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

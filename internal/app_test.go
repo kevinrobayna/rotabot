@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/fx"
@@ -15,9 +16,19 @@ import (
 	"testing"
 )
 
+func NewTestConfig() *config.AppConfig {
+	return &config.AppConfig{
+		Debug: true,
+		Slack: config.SlackConfig{
+			SigningSecret: "test",
+			ClientSecret:  "test",
+		},
+	}
+}
+
 func TestDependenciesAreSatisfied(t *testing.T) {
 	ctx := context.Background()
-	err := fx.ValidateApp(Module(ctx))
+	err := fx.ValidateApp(Module(ctx), fx.Provide(NewTestConfig))
 	assert.NoError(t, err)
 }
 
@@ -25,7 +36,7 @@ func TestSvc_Healthcheck(t *testing.T) {
 	ctx := context.Background()
 
 	var port Port
-	app := fxtest.New(t, Module(ctx), fx.Populate(&port))
+	app := fxtest.New(t, Module(ctx), fx.Provide(NewTestConfig), fx.Populate(&port))
 	defer app.RequireStart().RequireStop()
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%s/healthcheck", port))
