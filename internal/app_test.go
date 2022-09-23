@@ -33,8 +33,9 @@ func TestSvc_Healthcheck(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	_, err = io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err)
+	assert.JSONEq(t, string(body), `{"status":"ok"}`)
 }
 
 func TestMiddlewareOrder(t *testing.T) {

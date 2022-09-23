@@ -2,10 +2,12 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/julienschmidt/httprouter"
-	"github.com/kevinrobayna/rotabot/internal/rotabot"
+	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
+	"github.com/kevinrobayna/rotabot/internal/slack"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -23,8 +25,6 @@ func Module(ctx context.Context) fx.Option {
 		fx.Provide(provideServerRouter),
 		fx.Provide(provideHttpServer),
 		fx.Provide(func() context.Context { return ctx }),
-
-		fx.Provide(provideSlackConfig),
 		fx.Provide(provideService),
 
 		fx.Invoke(invokeHttpServer),
@@ -47,25 +47,22 @@ func provideListener(ctx context.Context) net.Listener {
 	return l
 }
 
-func provideSlackConfig() slackConfig {
-	return slackConfig{
-		signingSecret: "", // Basic Information > App Credentials > Signing Secret
-		clientSecret:  "", // OAuth & Permissions > OAuth Tokens for Your Workspace > Bot User OAuth Access Token
+func provideService(cfg config.AppConfig) slack.Service {
+	return slack.Service{
+		Config: cfg,
 	}
 }
 
-func provideService(cfg slackConfig) Resource {
-	return &resource{
-		slackConfig: cfg,
-		handler:     rotabot.Handler{},
-	}
-}
-
-func provideServerRouter(svc Resource) *httprouter.Router {
+func provideServerRouter() *httprouter.Router {
 	r := httprouter.New()
 
-	r.HandlerFunc(http.MethodGet, "/healthcheck", svc.HealthCheck())
-	r.HandlerFunc(http.MethodPost, "/slack/events", svc.SlackEvents())
+	r.HandlerFunc(http.MethodGet, "/healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		var result = make(map[string]string)
+		result["status"] = "ok"
+		json.NewEncoder(w).Encode(result)
+	})
 
 	return r
 }
