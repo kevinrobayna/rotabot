@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -20,8 +21,8 @@ func NewTestConfig() *config.AppConfig {
 	return &config.AppConfig{
 		Debug: true,
 		Slack: config.SlackConfig{
-			SigningSecret: "test",
-			ClientSecret:  "test",
+			SigningSecret: os.Getenv("SLACK_SIGNING_SECRET"),
+			ClientSecret:  os.Getenv("SLACK_CLIENT_SECRET"),
 		},
 	}
 }
