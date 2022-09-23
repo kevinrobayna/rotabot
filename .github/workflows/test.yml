@@ -29,7 +29,11 @@ jobs:
 
       - run: make build
 
-      - run: make test
+      - name: Run unit tests
+        env:
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+          SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
+        run: make test
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v3
