@@ -19,7 +19,7 @@ import (
 
 func NewTestConfig() *config.AppConfig {
 	return &config.AppConfig{
-		Debug: true,
+		Debug: false,
 		Slack: config.SlackConfig{
 			SigningSecret: os.Getenv("SLACK_SIGNING_SECRET"),
 			ClientSecret:  os.Getenv("SLACK_CLIENT_SECRET"),
