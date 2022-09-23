@@ -9,9 +9,9 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/slack-go/slack v0.11.2
 	github.com/stretchr/testify v1.8.0
-	github.com/urfave/cli/v2 v2.11.2
+	github.com/urfave/cli/v2 v2.16.3
 	go.uber.org/fx v1.18.1
-	go.uber.org/zap v1.22.0
+	go.uber.org/zap v1.23.0
 	gotest.tools/gotestsum v1.8.2
 )
 
