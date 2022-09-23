@@ -2,12 +2,10 @@ package internal
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/julienschmidt/httprouter"
 	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
-	"github.com/kevinrobayna/rotabot/internal/slack"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -47,22 +45,17 @@ func provideListener(ctx context.Context) net.Listener {
 	return l
 }
 
-func provideService(cfg config.AppConfig) slack.Service {
-	return slack.Service{
+func provideService(cfg config.AppConfig) Resource {
+	return Resource{
 		Config: cfg,
 	}
 }
 
-func provideServerRouter() *httprouter.Router {
+func provideServerRouter(resource Resource) *httprouter.Router {
 	r := httprouter.New()
 
-	r.HandlerFunc(http.MethodGet, "/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
-		var result = make(map[string]string)
-		result["status"] = "ok"
-		json.NewEncoder(w).Encode(result)
-	})
+	r.HandlerFunc(http.MethodGet, "/healthcheck", resource.HealthCheck())
+	r.HandlerFunc(http.MethodPost, "/slack/commands", resource.HandleSlashCommand())
 
 	return r
 }
