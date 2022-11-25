@@ -3,8 +3,8 @@ package internal
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -44,15 +44,15 @@ func provideListener(ctx context.Context) net.Listener {
 	return l
 }
 
-func provideServerRouter(_ context.Context) *httprouter.Router {
+func provideServerRouter(cfg *config.AppConfig) *httprouter.Router {
 	r := httprouter.New()
 
-	//TODO this needs to be moved out of here
-	r.GET("/healthcheck", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		shell.Logger(r.Context()).Info("Healthcheck")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "OK")
-	})
+	resource := &resource{
+		cfg: cfg,
+	}
+
+	r.HandlerFunc(http.MethodGet, "/healthcheck", resource.HealthCheck())
+	r.HandlerFunc(http.MethodPost, "/slack/commands", resource.HandleSlashCommand())
 
 	return r
 }

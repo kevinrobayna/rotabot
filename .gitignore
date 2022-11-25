@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,go,goland+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,go,goland+all
 
+TEST-.xml
+
+
 # This will ignore the output of the application
 bin/
 tools/

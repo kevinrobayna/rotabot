@@ -28,7 +28,10 @@ bin/%:
 
 .PHONY: test
 test:
-	gotestsum --packages="./..." -- -coverprofile=cover.out
+	gotestsum \
+		--format short-verbose \
+		--packages="./..." \
+		--junitfile TEST-$*.xml
 
 .PHONY: dev
 dev: build

@@ -27,8 +27,8 @@ func main() {
 
 	cli.VersionPrinter = func(c *cli.Context) {
 		fmt.Printf(
-			"Application: %s\nVersion: %v\nGo Version: %v\nGo OS/Arch: %v/%v\nBuilt at: %v\n",
-			AppName, Version, runtime.Version(), runtime.GOOS, runtime.GOARCH, Date,
+			"Application: %s\nVersion: %v\nSha: %s\nGo Version: %v\nGo OS/Arch: %v/%v\nBuilt at: %v\n",
+			AppName, Version, Sha, runtime.Version(), runtime.GOOS, runtime.GOARCH, Date,
 		)
 	}
 
