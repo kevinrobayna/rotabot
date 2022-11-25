@@ -35,8 +35,8 @@ jobs:
           SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
         run: make test
 
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v3
+      - name: Test Summary
+        uses: test-summary/action@v2
         with:
-          files: ./cover.out
-          verbose: true
+          paths: "**/TEST-*.xml"
+        if: always()

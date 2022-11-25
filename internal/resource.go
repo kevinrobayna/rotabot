@@ -34,6 +34,7 @@ func (resource *resource) HandleSlashCommand() http.HandlerFunc {
 
 		verifier, err := slack.NewSecretsVerifier(r.Header, resource.cfg.Slack.SigningSecret)
 		if err != nil {
+			l.Error("failed to create secrets verifier", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -41,11 +42,13 @@ func (resource *resource) HandleSlashCommand() http.HandlerFunc {
 		r.Body = io.NopCloser(io.TeeReader(r.Body, &verifier))
 		s, err := slack.SlashCommandParse(r)
 		if err != nil {
+			l.Error("failed to parse slash command", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		if err = verifier.Ensure(); err != nil {
+			l.Error("failed to verify slash command", zap.Error(err))
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
