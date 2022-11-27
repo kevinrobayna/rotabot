@@ -6,6 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
+	"github.com/slack-go/slack"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -49,6 +50,10 @@ func provideServerRouter(cfg *config.AppConfig) *httprouter.Router {
 
 	resource := &resource{
 		cfg: cfg,
+		commands: commandSvc{
+			cfg:    cfg,
+			client: slack.New(cfg.Slack.ClientSecret),
+		},
 	}
 
 	r.HandlerFunc(http.MethodGet, "/healthcheck", resource.HealthCheck())

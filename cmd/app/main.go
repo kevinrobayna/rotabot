@@ -6,6 +6,7 @@ import (
 	"github.com/kevinrobayna/rotabot/internal"
 	"github.com/kevinrobayna/rotabot/internal/shell"
 	"github.com/urfave/cli/v2"
+	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
 	"os/signal"
@@ -43,11 +44,36 @@ func main() {
 		Name:                 AppName,
 		Usage:                "SlackApp that makes team rotations easy",
 		Version:              Version,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "verbose",
+				Usage: "This will enable all possible logging, this means that sensitive information will be logged, so  avoid using this in production",
+				Value: false,
+			},
+			&cli.StringFlag{
+				Name:     "slack.signing_secret",
+				Usage:    "Secret that ensures the requests from slack are real",
+				Required: true,
+				EnvVars:  []string{"SLACK_SIGNING_SECRET"},
+			},
+			&cli.StringFlag{
+				Name:     "slack.client_secret",
+				Usage:    "Secret that allows app to access the slack API, format: `xoxb-*`",
+				Required: true,
+				EnvVars:  []string{"SLACK_CLIENT_SECRET"},
+			},
+		},
 		Commands: []*cli.Command{
 			internal.NewCommand(),
 		},
 		Before: func(ctx *cli.Context) error {
-			zl, err := shell.DefaultLoggerConfig().Build(zap.AddCaller())
+			cfg := shell.DefaultLoggerConfig()
+
+			if ctx.Bool("verbose") {
+				cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+			}
+
+			zl, err := cfg.Build(zap.AddCaller())
 			if err != nil {
 				return err
 			}
@@ -61,6 +87,7 @@ func main() {
 			zap.ReplaceGlobals(zl)
 
 			logger = zl
+			logger.Info("Logger initialized", zap.String("level", cfg.Level.String()))
 			ctx.Context = shell.WithLogger(ctx.Context, logger)
 			return nil
 		},

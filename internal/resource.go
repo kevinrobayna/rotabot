@@ -11,7 +11,8 @@ import (
 )
 
 type resource struct {
-	cfg *config.AppConfig
+	cfg      *config.AppConfig
+	commands commandSvc
 	endpoints
 }
 
@@ -55,7 +56,11 @@ func (resource *resource) HandleSlashCommand() http.HandlerFunc {
 
 		switch s.Command {
 		case "/rotabot":
-			// TODO: handle command, for now we are just acknowledging the request
+			if err = resource.commands.Handle(r.Context(), &s); err != nil {
+				l.Error("something went wrong while processing command", zap.Error(err))
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 			w.WriteHeader(http.StatusOK)
 		default:
 			l.Error("unknown_command", zap.String("command", s.Command))
