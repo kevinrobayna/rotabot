@@ -37,27 +37,7 @@ func (svc *commandSvc) handleUnknown(ctx context.Context, cmd *slack.SlashComman
 	l := shell.Logger(ctx)
 	l.Debug("Posting help message")
 
-	blocks := []slack.Block{
-		slack.NewContextBlock(
-			"help",
-			[]slack.MixedElement{
-				slack.NewTextBlockObject(slack.MarkdownType, "This is the list of actions available for Rotabot: :robot_face:", false, false),
-				slack.NewTextBlockObject(slack.MarkdownType, "- create name_of_rota schedule: Creates a new rota with the given schedule(DAILY, WEEKLY)", false, false),
-				slack.NewTextBlockObject(slack.MarkdownType, "- add_member name_of_rota \"@User\": Adds a member to the given rota", false, false),
-				slack.NewTextBlockObject(slack.MarkdownType, "- list: Lists all the rotas available on this channel", false, false),
-				slack.NewTextBlockObject(slack.MarkdownType, "- current name_of_rota: Shows the current member on the given rota", false, false),
-			}...,
-		),
-	}
-
-	_, _, err := svc.client.PostMessageContext(
-		ctx,
-		cmd.ChannelID,
-
-		slack.MsgOptionBlocks(blocks...),
-		slack.MsgOptionAsUser(true),
-		slack.MsgOptionPostEphemeral(cmd.UserID),
-	)
+	_, err := svc.client.OpenViewContext(ctx, cmd.TriggerID, generateModal())
 	if err != nil {
 		l.Warn("Failed to post help message", zap.Error(err))
 		return err
@@ -65,4 +45,17 @@ func (svc *commandSvc) handleUnknown(ctx context.Context, cmd *slack.SlashComman
 
 	l.Debug("Help message posted successfully")
 	return nil
+}
+
+func generateModal() slack.ModalViewRequest {
+	return slack.ModalViewRequest{
+		Type:  slack.VTModal,
+		Title: slack.NewTextBlockObject(slack.MarkdownType, "Rotabot :robot_face:", false, false),
+		Close: slack.NewTextBlockObject(slack.MarkdownType, "Close", false, false),
+		Blocks: slack.Blocks{
+			BlockSet: []slack.Block{
+				slack.NewDividerBlock(),
+			},
+		},
+	}
 }
