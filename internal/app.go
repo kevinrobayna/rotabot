@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/kevinrobayna/rotabot/internal/config"
@@ -36,11 +37,10 @@ func providePort(listener net.Listener) Port {
 	return Port(addr)
 }
 
-func provideListener(ctx context.Context) net.Listener {
-	addr := ":8080"
-	l, err := net.Listen("tcp", addr)
+func provideListener(ctx context.Context, cfg *config.AppConfig) net.Listener {
+	l, err := net.Listen("tcp", cfg.Server.Addr)
 	if err != nil {
-		shell.Logger(ctx).Fatal("failed to listen on addr", zap.String("addr", addr), zap.Error(err))
+		shell.Logger(ctx).Fatal("failed to listen on addr", zap.String("addr", cfg.Server.Addr), zap.Error(err))
 	}
 	return l
 }
@@ -59,13 +59,14 @@ func provideServerRouter(cfg *config.AppConfig) *httprouter.Router {
 }
 
 func provideHttpServer(ctx context.Context, r *httprouter.Router) *http.Server {
-	// TODO: add requests time-outs since we don't want to keep connections open forever
 	return &http.Server{
 		Handler: wireUpMiddlewares(http.Handler(r)),
 		BaseContext: func(listener net.Listener) context.Context {
 			return ctx
 		},
-		ErrorLog: stdlog.New(&zapio.Writer{Log: shell.Logger(ctx), Level: zapcore.ErrorLevel}, "", 0),
+		ErrorLog:          stdlog.New(&zapio.Writer{Log: shell.Logger(ctx), Level: zapcore.ErrorLevel}, "", 0),
+		ReadTimeout:       100 * time.Millisecond,
+		ReadHeaderTimeout: 100 * time.Millisecond,
 	}
 }
 
