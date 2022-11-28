@@ -2,12 +2,13 @@ package internal
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
+
 	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
-	"io"
-	"net/http"
 )
 
 type resource struct {

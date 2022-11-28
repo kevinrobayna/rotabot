@@ -2,16 +2,17 @@ package internal
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
 	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"testing"
 )
 
 type AppSuite struct {
@@ -47,7 +48,7 @@ func (suite *AppSuite) TestMiddlewareOrder() {
 	observedLogger := zap.New(observedZapCore)
 	ctx = shell.WithLogger(ctx, observedLogger.With(zap.String("test", "flag")))
 
-	req := httptest.NewRequest("GET", "http://testing/foo", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://testing/foo", nil)
 
 	h := wireUpMiddlewares(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

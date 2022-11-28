@@ -2,9 +2,10 @@ package shell
 
 import (
 	"context"
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
 )
 
 // This is required to make the logger available in the ctx or fetch it from the ctx

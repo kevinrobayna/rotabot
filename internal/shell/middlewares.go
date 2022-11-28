@@ -3,18 +3,19 @@ package shell
 import (
 	"context"
 	"fmt"
-	uuidGen "github.com/google/uuid"
-	"go.uber.org/zap"
 	"net/http"
 	"path"
 	"time"
+
+	uuidGen "github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 func RecoveryHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		l := Logger(r.Context())
 
-		defer func(logger *zap.Logger) {
+		defer func(_ *zap.Logger) {
 			if rawErr := recover(); rawErr != nil {
 				var err error
 				switch e := rawErr.(type) {

@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kevinrobayna/rotabot/internal"
-	"github.com/kevinrobayna/rotabot/internal/shell"
-	"github.com/urfave/cli/v2"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
+
+	"github.com/kevinrobayna/rotabot/internal"
+	"github.com/kevinrobayna/rotabot/internal/shell"
+	"github.com/urfave/cli/v2"
+	"go.uber.org/zap/zapcore"
 
 	"go.uber.org/zap"
 )
@@ -27,16 +28,10 @@ func main() {
 	var logger *zap.Logger
 
 	cli.VersionPrinter = func(c *cli.Context) {
-		fmt.Printf(
+		_, _ = fmt.Printf(
 			"Application: %s\nVersion: %v\nSha: %s\nGo Version: %v\nGo OS/Arch: %v/%v\nBuilt at: %v\n",
 			AppName, Version, Sha, runtime.Version(), runtime.GOOS, runtime.GOARCH, Date,
 		)
-	}
-
-	cli.VersionFlag = &cli.BoolFlag{
-		Name:    "version",
-		Aliases: []string{"v"},
-		Usage:   "print detailed version information",
 	}
 
 	app := &cli.App{

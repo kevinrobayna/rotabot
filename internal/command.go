@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+
 	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
 	"github.com/slack-go/slack"
@@ -57,7 +58,6 @@ func (svc *commandSvc) handleUnknown(ctx context.Context, cmd *slack.SlashComman
 		slack.MsgOptionAsUser(true),
 		slack.MsgOptionPostEphemeral(cmd.UserID),
 	)
-
 	if err != nil {
 		l.Warn("Failed to post help message", zap.Error(err))
 		return err
