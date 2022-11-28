@@ -18,6 +18,11 @@ func NewCommand() *cli.Command {
 				Usage:       "Port for the app to listen on",
 				DefaultText: ":8080",
 			},
+			&cli.StringFlag{
+				Name:        "server.addr",
+				Usage:       "Port for the app to listen on",
+				DefaultText: ":8080",
+			},
 		},
 		Action: func(c *cli.Context) error {
 			logger := shell.Logger(c.Context).With(zap.String("component", "rotabot.server"))
