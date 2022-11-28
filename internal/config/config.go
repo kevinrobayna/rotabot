@@ -9,12 +9,16 @@ func NewAppConfig(c *cli.Context) *AppConfig {
 			SigningSecret: c.String("slack.signing_secret"),
 			ClientSecret:  c.String("slack.client_secret"),
 		},
+		Server: HttpConfig{
+			Addr: c.String("server.addr"),
+		},
 	}
 }
 
 type AppConfig struct {
-	Debug bool
-	Slack SlackConfig
+	Debug  bool
+	Slack  SlackConfig
+	Server HttpConfig
 }
 
 type SlackConfig struct {
@@ -22,4 +26,8 @@ type SlackConfig struct {
 	SigningSecret string
 	// OAuth & Permissions > OAuth Tokens for Your Workspace > Bot User OAuth Access Token
 	ClientSecret string
+}
+
+type HttpConfig struct {
+	Addr string
 }

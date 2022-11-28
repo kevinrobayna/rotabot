@@ -3,17 +3,18 @@ package shell
 import (
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	uuidGen "github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestMiddlewareAddsUUIDToRequestContext(t *testing.T) {
-	req := httptest.NewRequest("GET", "http://testing", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://testing", nil)
 
 	handlerToTest := RequestIdHandler(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,7 @@ func TestMiddlewareAddsUUIDToRequestContext(t *testing.T) {
 }
 
 func TestMiddlewareReusesUUIDIfPresentOnRequest(t *testing.T) {
-	req := httptest.NewRequest("GET", "http://testing", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://testing", nil)
 	req.Header.Set(string(RequestIdKey), "123")
 
 	handlerToTest := RequestIdHandler(
@@ -56,7 +57,7 @@ func TestPanicRecoveryMiddleware(t *testing.T) {
 	observedLogger := zap.New(observedZapCore)
 	ctx = WithLogger(ctx, observedLogger)
 
-	req := httptest.NewRequest("GET", "http://testing", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://testing", nil)
 
 	handlerToTest := RecoveryHandler(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +85,7 @@ func TestPanicRecoveryMiddlewareWithError(t *testing.T) {
 	observedLogger := zap.New(observedZapCore)
 	ctx = WithLogger(ctx, observedLogger)
 
-	req := httptest.NewRequest("GET", "http://testing", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://testing", nil)
 
 	handlerToTest := RecoveryHandler(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +113,7 @@ func TestRequestLogHandler(t *testing.T) {
 	observedLogger := zap.New(observedZapCore)
 	ctx = WithLogger(ctx, observedLogger)
 
-	req := httptest.NewRequest("GET", "http://testing/foo", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://testing/foo", nil)
 
 	handlerToTest := RequestAccessLogHandler(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -141,7 +142,7 @@ func TestLoggerInjectionHandler(t *testing.T) {
 	observedLogger := zap.New(observedZapCore)
 	ctx = WithLogger(ctx, observedLogger)
 
-	req := httptest.NewRequest("GET", "http://testing/foo", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://testing/foo", nil)
 
 	handlerToTest := LoggerInjectionHandler(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
