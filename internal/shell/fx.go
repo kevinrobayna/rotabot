@@ -2,6 +2,7 @@ package shell
 
 import (
 	"context"
+
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 )

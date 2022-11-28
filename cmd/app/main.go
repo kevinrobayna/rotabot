@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kevinrobayna/rotabot/internal"
-	"github.com/kevinrobayna/rotabot/internal/shell"
-	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
+
+	"github.com/kevinrobayna/rotabot/internal"
+	"github.com/kevinrobayna/rotabot/internal/shell"
+	"github.com/urfave/cli/v2"
 
 	"go.uber.org/zap"
 )

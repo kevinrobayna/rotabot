@@ -3,11 +3,12 @@ package shell
 import (
 	"context"
 	"fmt"
-	uuidGen "github.com/google/uuid"
-	"go.uber.org/zap"
 	"net/http"
 	"path"
 	"time"
+
+	uuidGen "github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 func RecoveryHandler(next http.Handler) http.Handler {

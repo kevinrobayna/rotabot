@@ -3,6 +3,11 @@ package internal
 import (
 	"context"
 	"errors"
+	stdlog "log"
+	"net"
+	"net/http"
+	"strings"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/kevinrobayna/rotabot/internal/config"
 	"github.com/kevinrobayna/rotabot/internal/shell"
@@ -10,10 +15,6 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zapio"
-	stdlog "log"
-	"net"
-	"net/http"
-	"strings"
 )
 
 func Module(ctx context.Context) fx.Option {
@@ -58,7 +59,7 @@ func provideServerRouter(cfg *config.AppConfig) *httprouter.Router {
 }
 
 func provideHttpServer(ctx context.Context, r *httprouter.Router) *http.Server {
-	//TODO: add requests time-outs since we don't want to keep connections open forever
+	// TODO: add requests time-outs since we don't want to keep connections open forever
 	return &http.Server{
 		Handler: wireUpMiddlewares(http.Handler(r)),
 		BaseContext: func(listener net.Listener) context.Context {
