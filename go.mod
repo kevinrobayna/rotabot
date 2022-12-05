@@ -11,7 +11,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/urfave/cli/v2 v2.23.5
 	go.uber.org/fx v1.18.2
-	go.uber.org/zap v1.23.0
+	go.uber.org/zap v1.24.0
 	gotest.tools/gotestsum v1.8.2
 )
 
