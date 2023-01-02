@@ -57,8 +57,14 @@ func provideServerRouter(cfg *config.AppConfig) *httprouter.Router {
 		},
 	}
 
+	slackVerifier := shell.SlackVerifier{
+		Secret: cfg.Slack.SigningSecret,
+	}
+
 	r.HandlerFunc(http.MethodGet, "/healthcheck", resource.HealthCheck())
-	r.HandlerFunc(http.MethodPost, "/slack/commands", resource.HandleSlashCommand())
+	r.HandlerFunc(http.MethodPost, "/slack/commands",
+		slackVerifier.SlackSignatureVerifyHandler(resource.HandleSlashCommand()),
+	)
 
 	return r
 }

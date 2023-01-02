@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"github.com/kevinrobayna/rotabot/internal/config"
@@ -34,27 +33,12 @@ func (resource *resource) HandleSlashCommand() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		l := shell.Logger(r.Context())
 
-		verifier, err := slack.NewSecretsVerifier(r.Header, resource.cfg.Slack.SigningSecret)
-		if err != nil {
-			l.Error("failed to create secrets verifier", zap.Error(err))
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		r.Body = io.NopCloser(io.TeeReader(r.Body, &verifier))
 		s, err := slack.SlashCommandParse(r)
 		if err != nil {
 			l.Error("failed to parse slash command", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		if err = verifier.Ensure(); err != nil {
-			l.Error("failed to verify slash command", zap.Error(err))
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
 		switch s.Command {
 		case "/rotabot":
 			if err = resource.commands.Handle(r.Context(), &s); err != nil {
