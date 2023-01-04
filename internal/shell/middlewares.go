@@ -3,9 +3,12 @@ package shell
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"path"
 	"time"
+
+	"github.com/slack-go/slack"
 
 	uuidGen "github.com/google/uuid"
 	"go.uber.org/zap"
@@ -94,4 +97,30 @@ func LoggerInjectionHandler(next http.Handler) http.Handler {
 		)
 		next.ServeHTTP(w, r.WithContext(WithLogger(ctx, l)))
 	})
+}
+
+type SlackVerifier struct {
+	Secret string
+}
+
+func (sv *SlackVerifier) SlackSignatureVerifyHandler(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		l := Logger(r.Context())
+
+		verifier, err := slack.NewSecretsVerifier(r.Header, sv.Secret)
+		if err != nil {
+			l.Error("failed to create secrets verifier", zap.Error(err))
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		r.Body = io.NopCloser(io.TeeReader(r.Body, &verifier))
+		if err = verifier.Ensure(); err != nil {
+			l.Error("failed to verify request signature", zap.Error(err))
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}
 }

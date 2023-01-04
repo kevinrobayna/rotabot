@@ -13,23 +13,6 @@ func NewCommand() *cli.Command {
 		Name:  "web",
 		Usage: "Starts the rotabot server and its dependencies",
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:  "verbose",
-				Usage: "This will enable all possible logging, this means that sensitive information will be logged, so  avoid using this in production",
-				Value: false,
-			},
-			&cli.StringFlag{
-				Name:     "slack.signing_secret",
-				Usage:    "Secret that ensures the requests from slack are real",
-				Required: true,
-				EnvVars:  []string{"SLACK_SIGNING_SECRET"},
-			},
-			&cli.StringFlag{
-				Name:     "slack.client_secret",
-				Usage:    "Secret that allows app to access the slack API, format: `xoxb-*`",
-				Required: true,
-				EnvVars:  []string{"SLACK_CLIENT_SECRET"},
-			},
 			&cli.StringFlag{
 				Name:        "server.addr",
 				Usage:       "Port for the app to listen on",
