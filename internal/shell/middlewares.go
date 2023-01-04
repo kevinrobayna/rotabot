@@ -3,11 +3,12 @@ package shell
 import (
 	"context"
 	"fmt"
-	"github.com/slack-go/slack"
 	"io"
 	"net/http"
 	"path"
 	"time"
+
+	"github.com/slack-go/slack"
 
 	uuidGen "github.com/google/uuid"
 	"go.uber.org/zap"
