@@ -10,7 +10,7 @@ require (
 	github.com/slack-go/slack v0.12.1
 	github.com/stretchr/testify v1.8.1
 	github.com/urfave/cli/v2 v2.23.7
-	go.uber.org/fx v1.18.2
+	go.uber.org/fx v1.19.0
 	go.uber.org/zap v1.24.0
 	gotest.tools/gotestsum v1.8.2
 )
@@ -174,7 +174,7 @@ require (
 	github.com/yeya24/promlinter v0.2.0 // indirect
 	gitlab.com/bosi/decorder v0.2.3 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/dig v1.15.0 // indirect
+	go.uber.org/dig v1.16.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	golang.org/x/exp/typeparams v0.0.0-20220827204233-334a2380cb91 // indirect
